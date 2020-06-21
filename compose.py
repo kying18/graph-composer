@@ -1,3 +1,5 @@
+import os
+import re
 from graph import Graph, Vertex
 import string
 import random
@@ -6,9 +8,11 @@ import random
 def get_words_from_text(text_path):
     with open(text_path, 'r') as file:
         text = file.read()
-        # text = ' '.join(text.split())
+        # remove [verse 1: artist]
+        text = re.sub(r'\[(.+)\]', ' ', text)
+        text = ' '.join(text.split())
         text = text.lower()
-        # text = text.translate(str.maketrans('', '', string.punctuation))
+        text = text.translate(str.maketrans('', '', string.punctuation))
 
     words = text.split()
 
@@ -44,8 +48,13 @@ def compose(g, words, length=50):
     return composition
 
 
-def main():
-    words = get_words_from_text('billie.txt')
+def main(artist):
+    words = []
+    for song in os.listdir('songs/{}'.format(artist)):
+        if song == '.DS_Store':
+            continue
+        words.extend(get_words_from_text('songs/{artist}/{song}'.format(artist=artist, song=song)))
+        
     g = make_graph(words)
     g.generate_probability_mappings()
     composition = compose(g, words, 100)
@@ -53,5 +62,4 @@ def main():
 
 
 if __name__ == '__main__':
-    # print(string.punctuation)
-    main()
+    main('roddy_ricch')
